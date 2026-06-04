@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineSearch — Moteur de Recherche de Films & Séries</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #020b18;
+    --bg-dark: #041424;
+    --bg-mid: #072040;
+    --bg-card: #0a2a52;
+    --bg-card-hover: #0d3366;
+    --blue-bright: #1a8fff;
+    --blue-glow: #0d6fd1;
+    --blue-light: #4db3ff;
+    --blue-pale: #a8d8ff;
+    --blue-ultra: #00c8ff;
+    --accent: #ff6b35;
+    --accent-soft: #ff8c5a;
+    --text-primary: #e8f4ff;
+    --text-secondary: #7fb3e0;
+    --text-muted: #3d6a9a;
+    --border: rgba(26,143,255,0.2);
+    --border-bright: rgba(26,143,255,0.5);
+    --star: #ffd700;
+    --gold: #ffaa00;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-deep);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* BACKGROUND ANIMATED */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(10,60,130,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 90%, rgba(5,40,100,0.4) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(15,50,110,0.15) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Stars background */
+  .stars {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .stars::before, .stars::after {
+    content: '';
+    position: absolute;
+    width: 2px; height: 2px;
+    border-radius: 50%;
+    background: white;
+    box-shadow:
+      120px 80px rgba(255,255,255,0.4), 300px 200px rgba(168,216,255,0.3),
+      500px 60px rgba(255,255,255,0.25), 700px 350px rgba(168,216,255,0.4),
+      900px 120px rgba(255,255,255,0.3), 1100px 280px rgba(168,216,255,0.2),
+      150px 400px rgba(255,255,255,0.3), 450px 500px rgba(168,216,255,0.25),
+      800px 450px rgba(255,255,255,0.35), 1200px 550px rgba(168,216,255,0.3),
+      60px 650px rgba(255,255,255,0.2), 350px 700px rgba(168,216,255,0.25),
+      650px 750px rgba(255,255,255,0.3), 1000px 800px rgba(168,216,255,0.2),
+      1300px 180px rgba(255,255,255,0.3), 1450px 420px rgba(168,216,255,0.25),
+      200px 900px rgba(255,255,255,0.2), 600px 920px rgba(168,216,255,0.3),
+      1100px 930px rgba(255,255,255,0.25), 1400px 700px rgba(168,216,255,0.2);
+  }
+  .stars::after {
+    width: 1px; height: 1px;
+    box-shadow:
+      80px 150px rgba(255,255,255,0.5), 240px 320px rgba(255,255,255,0.35),
+      420px 180px rgba(255,255,255,0.4), 600px 420px rgba(255,255,255,0.3),
+      820px 250px rgba(255,255,255,0.45), 1050px 380px rgba(255,255,255,0.3),
+      1250px 100px rgba(255,255,255,0.4), 1400px 520px rgba(255,255,255,0.35),
+      100px 580px rgba(255,255,255,0.3), 380px 620px rgba(255,255,255,0.4),
+      720px 690px rgba(255,255,255,0.35), 950px 600px rgba(255,255,255,0.25);
+  }
+
+  /* HEADER */
+  header {
+    position: relative;
+    z-index: 100;
+    padding: 0 2rem;
+    background: linear-gradient(180deg, rgba(2,11,24,0.98) 0%, rgba(4,20,36,0.9) 100%);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 4px 40px rgba(26,143,255,0.08);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 0 0.8rem;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--blue-glow), var(--blue-ultra));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 20px rgba(26,143,255,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .logo-icon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  }
+
+  .logo-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 3px;
+    background: linear-gradient(90deg, #fff, var(--blue-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .logo-sub {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: block;
+    margin-top: -6px;
+    margin-left: 1px;
+  }
+
+  nav {
+    display: flex;
+    gap: 0.2rem;
+    align-items: center;
+  }
+
+  nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  nav a:hover { color: var(--text-primary); background: rgba(26,143,255,0.1); }
+  nav a.active { color: var(--blue-light); background: rgba(26,143,255,0.12); }
+
+  .nav-cta {
+    background: linear-gradient(135deg, var(--blue-glow), var(--blue-bright)) !important;
+    color: white !important;
+    padding: 0.45rem 1rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s !important;
+  }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(26,143,255,0.4) !important; }
+
+  /* SEARCH BAR */
+  .search-wrapper {
+    padding: 1rem 0 1.2rem;
+    max-width: 780px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 110;
+  }
+
+  .search-container {
+    position: relative;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 110;
+  }
+
+  .search-box {
+    flex: 1;
+    position: relative;
+    z-index: 110;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    background: rgba(10,42,82,0.7);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.85rem 1rem 0.85rem 2.8rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.25s;
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 110;
+    pointer-events: auto !important;
+  }
+  .search-input::placeholder { color: var(--text-muted); }
+  .search-input:focus {
+    border-color: var(--blue-bright);
+    background: rgba(13,51,102,0.8);
+    box-shadow: 0 0 0 3px rgba(26,143,255,0.15), 0 0 20px rgba(26,143,255,0.1);
+  }
+
+  .search-btn {
+    background: linear-gradient(135deg, var(--blue-glow), var(--blue-bright));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0 1.5rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+  .search-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,143,255,0.4); }
+
+  .filter-tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+  }
+
+  .filter-tab {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 0.3rem 0.9rem;
+    border-radius: 20px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .filter-tab:hover { border-color: var(--blue-bright); color: var(--blue-light); }
+  .filter-tab.active {
+    background: rgba(26,143,255,0.15);
+    border-color: var(--blue-bright);
+    color: var(--blue-light);
+  }
+
+  /* SEARCH RESULTS PANEL */
+  #search-results {
+    display: none;
+    position: relative;
+    z-index: 50;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .results-title {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+  }
+  .results-title span { color: var(--blue-light); font-weight: 600; }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.2rem;
+  }
+
+  /* MAIN CONTENT */
+  main {
+    position: relative;
+    z-index: 10;
+    padding: 2.5rem 2rem 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.4rem;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .section-title h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    color: var(--text-primary);
+  }
+
+  .section-badge {
+    background: rgba(26,143,255,0.15);
+    border: 1px solid rgba(26,143,255,0.3);
+    color: var(--blue-light);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    letter-spacing: 1px;
+  }
+
+  .see-all {
+    color: var(--blue-light);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s;
+  }
+  .see-all:hover { color: var(--blue-pale); gap: 0.5rem; }
+
+  /* FILM CARDS */
+  .films-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 3rem;
+  }
+
+  .film-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    group: true;
+  }
+  .film-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    border-color: var(--border-bright);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 20px rgba(26,143,255,0.15);
+  }
+
+  .film-poster {
+    width: 100%;
+    aspect-ratio: 2/3;
+    background: linear-gradient(160deg, var(--bg-mid), var(--bg-card-hover));
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .film-poster-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .film-poster-emoji {
+    position: relative;
+    z-index: 3;
+    font-size: 3rem;
+    opacity: 0.4;
+  }
+
+  .film-poster-gradient {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60%;
+    background: linear-gradient(to top, rgba(4,20,36,0.95), transparent);
+    z-index: 2;
+  }
+
+  .film-type-badge {
+    position: absolute;
+    top: 0.6rem; left: 0.6rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .badge-film { background: rgba(26,143,255,0.85); color: white; }
+  .badge-serie { background: rgba(255,107,53,0.85); color: white; }
+  .badge-anime { background: rgba(138,43,226,0.85); color: white; }
+  .badge-docu { background: rgba(0,180,100,0.85); color: white; }
+
+  .film-rating {
+    position: absolute;
+    bottom: 0.5rem; right: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--star);
+  }
+  .film-rating::before { content: '★'; }
+
+  .film-info {
+    padding: 0.8rem;
+  }
+
+  .film-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .film-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .film-genre {
+    background: rgba(26,143,255,0.1);
+    color: var(--text-secondary);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(2,11,24,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 2rem;
+  }
+  .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+
+  .modal {
+    background: linear-gradient(160deg, var(--bg-mid), var(--bg-dark));
+    border: 1px solid var(--border-bright);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 720px;
+    padding: 2rem;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 40px rgba(26,143,255,0.1);
+    margin: auto;
+    position: relative;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    background: rgba(26,143,255,0.1);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .modal-close:hover { background: rgba(26,143,255,0.2); color: var(--text-primary); }
+
+  .modal-header {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-poster {
+    width: 140px;
+    height: 210px;
+    background: linear-gradient(160deg, var(--bg-card), var(--bg-card-hover));
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    overflow: hidden;
+  }
+
+  .modal-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .modal-meta { flex: 1; }
+
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 2px;
+    margin-bottom: 0.3rem;
+    line-height: 1.1;
+  }
+
+  .modal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.7rem 0;
+  }
+
+  .modal-tag {
+    background: rgba(26,143,255,0.12);
+    border: 1px solid rgba(26,143,255,0.25);
+    color: var(--blue-light);
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .modal-rating-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0.5rem 0;
+    font-size: 0.85rem;
+  }
+
+  .modal-stars { color: var(--star); font-size: 1rem; letter-spacing: 2px; }
+  .modal-rating-num { font-size: 1.4rem; font-weight: 700; color: var(--star); }
+  .modal-year { color: var(--text-muted); }
+
+  .modal-description {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-download {
+    flex: 1;
+    min-width: 160px;
+    background: linear-gradient(135deg, var(--blue-glow), var(--blue-bright));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.85rem 1.5rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    letter-spacing: 0.3px;
+    text-decoration: none;
+  }
+  .btn-download:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26,143,255,0.4); }
+
+  .btn-secondary {
+    background: rgba(26,143,255,0.1);
+    border: 1px solid var(--border-bright);
+    color: var(--blue-light);
+  }
+  .btn-secondary:hover { background: rgba(26,143,255,0.2); box-shadow: 0 4px 15px rgba(26,143,255,0.15); }
+
+  /* AVIS SECTION */
+  .reviews-section {
+    margin-top: 3rem;
+  }
+
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .review-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem;
+    transition: all 0.2s;
+  }
+  .review-card:hover { border-color: var(--border-bright); }
+
+  .review-header {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .review-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue-glow), var(--blue-ultra));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .review-user { font-weight: 600; font-size: 0.9rem; }
+  .review-film { font-size: 0.75rem; color: var(--text-muted); }
+  .review-stars { color: var(--star); font-size: 0.85rem; margin-left: auto; }
+
+  .review-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .review-date {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.7rem;
+  }
+
+  .add-review-btn {
+    background: transparent;
+    border: 1px dashed rgba(26,143,255,0.4);
+    color: var(--text-secondary);
+    border-radius: 14px;
+    padding: 1.2rem;
+    width: 100%;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .add-review-btn:hover { border-color: var(--blue-bright); color: var(--blue-light); background: rgba(26,143,255,0.05); }
+
+  /* DEMANDE SECTION */
+  .demande-section {
+    margin-top: 3rem;
+    background: linear-gradient(135deg, rgba(10,42,82,0.6), rgba(7,32,64,0.6));
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .demande-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(26,143,255,0.08), transparent 70%);
+    pointer-events: none;
+  }
+
+  .demande-content {
+    max-width: 520px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .demande-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+  }
+  .demande-title span { color: var(--blue-light); }
+
+  .demande-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .demande-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+  }
+
+  .form-input, .form-select, .form-textarea {
+    background: rgba(4,20,36,0.7);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.2s;
+    width: 100%;
+  }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--blue-bright);
+    background: rgba(7,32,64,0.8);
+    box-shadow: 0 0 0 3px rgba(26,143,255,0.1);
+  }
+  .form-select option { background: var(--bg-dark); }
+
+  .form-textarea { resize: vertical; min-height: 80px; }
+
+  .submit-btn {
+    background: linear-gradient(135deg, var(--blue-glow), var(--blue-bright));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 1.5rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-self: flex-start;
+  }
+  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,143,255,0.35); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 2rem; right: 2rem;
+    background: linear-gradient(135deg, var(--bg-mid), var(--bg-card));
+    border: 1px solid var(--blue-bright);
+    border-radius: 12px;
+    padding: 0.9rem 1.3rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    z-index: 2000;
+    transform: translateY(120px);
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .toast.show { transform: translateY(0); }
+  .toast-icon { font-size: 1.2rem; }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 10;
+    background: rgba(4,20,36,0.95);
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    background: linear-gradient(90deg, #fff, var(--blue-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+  }
+
+  .footer-text {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+
+  .footer-disclaimer {
+    margin-top: 0.8rem;
+    font-size: 0.72rem;
+    color: rgba(61,106,154,0.7);
+  }
+
+  .footer-author {
+    margin-top: 0.6rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--blue-light);
+    letter-spacing: 0.6px;
+  }
+
+  /* DEMANDES LIST */
+  .demandes-list-section { margin-top: 1.2rem; text-align:left; max-width:900px; margin-left:auto; margin-right:auto; }
+  #demandes-list { list-style:none; padding:0; margin:0.6rem 0 0 0; display:grid; gap:0.6rem; }
+  .demande-item { background: rgba(255,255,255,0.03); padding:0.8rem 1rem; border-radius:8px; display:flex; flex-direction:column; gap:0.4rem; }
+  .demande-item strong { color:#fff; font-size:0.95rem; }
+  .dem-type { font-size:0.75rem; color:var(--blue-light); margin-left:0.4rem; }
+  .dem-info { color:var(--text-muted); font-size:0.85rem; }
+  .dem-meta { font-size:0.75rem; color:rgba(255,255,255,0.45); }
+  .demande-item .tiny { justify-self:flex-end; background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--text-muted); padding:4px 8px; border-radius:6px; cursor:pointer; }
+
+  /* HERO BANNER */
+  .hero-banner {
+    background: linear-gradient(135deg, rgba(13,111,209,0.2), rgba(0,200,255,0.05));
+    border: 1px solid rgba(26,143,255,0.15);
+    border-radius: 18px;
+    padding: 2rem 2.5rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .hero-banner::before {
+    content: '';
+    position: absolute;
+    right: -20%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(26,143,255,0.07), transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-content { position: relative; z-index: 1; max-width: 540px; }
+
+  .hero-avatar {
+    position: relative;
+    z-index: 1;
+    min-width: 260px;
+    max-width: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: radial-gradient(circle at top, rgba(255,255,255,0.12), transparent 55%);
+    border-radius: 28px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+  }
+
+  .hero-avatar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08), transparent 55%);
+    pointer-events: none;
+  }
+
+  .hero-avatar img {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    transform: perspective(900px) rotateY(-14deg) rotateX(6deg);
+    transition: transform 0.35s ease;
+    filter: drop-shadow(0 18px 45px rgba(0, 0, 0, 0.14));
+    display: block;
+  }
+
+  .hero-avatar:hover img {
+    transform: perspective(900px) rotateY(0deg) rotateX(0deg) translateY(-6px);
+  }
+
+  .hero-eyebrow {
+    color: var(--blue-light);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    letter-spacing: 3px;
+    line-height: 1.1;
+    margin-bottom: 0.6rem;
+  }
+
+  .hero-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    max-width: 400px;
+    line-height: 1.6;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 2rem;
+    flex-shrink: 0;
+  }
+
+  .stat { text-align: center; }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 1px;
+    color: var(--blue-light);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-deep); }
+  ::-webkit-scrollbar-thumb { background: var(--bg-card-hover); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--blue-glow); }
+
+  @media (max-width: 768px) {
+    header { padding: 0 1rem; }
+    .header-top { flex-direction: column; gap: 0.8rem; }
+    nav { flex-wrap: wrap; justify-content: center; }
+    main { padding: 1.5rem 1rem 3rem; }
+    .hero-banner { flex-direction: column; padding: 1.5rem; }
+    .hero-avatar { width: 100%; max-width: none; min-width: auto; }
+    .hero-avatar svg { transform: perspective(900px) rotateY(0deg) rotateX(0deg); }
+    .hero-stats { gap: 1.5rem; }
+    .films-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .form-row { grid-template-columns: 1fr; }
+    .modal { padding: 1.5rem; }
+    .modal-header { flex-direction: column; align-items: center; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <a class="logo" href="#" onclick="showHome()">
+      <div class="logo-icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="42" height="42">
+          <defs>
+            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#4db3ff" />
+              <stop offset="100%" stop-color="#1a8fff" />
+            </linearGradient>
+          </defs>
+          <circle cx="28" cy="28" r="16" fill="url(#logoGradient)" opacity="0.95" />
+          <path d="M22 22 L22 34 L34 34 L34 22 Z" fill="#fff" opacity="0.88" />
+          <circle cx="28" cy="28" r="8" fill="#0a2242" />
+          <path d="M26 20 L20 20 L20 44 L26 44" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.7" />
+          <path d="M30 20 L36 20 L36 44 L30 44" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.7" />
+          <path d="M22 28 L16 34" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+          <path d="M30 36 L40 46" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+          <circle cx="40" cy="44" r="6" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.9" />
+        </svg>
+      </div>
+      <div>
+        <span class="logo-text">CINESEARCH</span>
+        <span class="logo-sub">Recherche cinéma stylée</span>
+      </div>
+    </a>
+    <nav>
+      <a href="#" class="active" onclick="showSection('films')">Films</a>
+      <a href="#" onclick="showSection('series')">Séries</a>
+      <a href="#" onclick="showSection('animes')">Animés</a>
+      <a href="#" onclick="showSection('documentaires')">Docs</a>
+      <a href="#demande-section" class="nav-cta">+ Signaler</a>
+    </nav>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="search-wrapper">
+    <div class="search-container">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Rechercher un film, une série, un acteur…" tabindex="0" oninput="handleSearch()" onkeypress="if(event.key==='Enter')performSearch()">
+      </div>
+      <button class="search-btn" onclick="performSearch()">Rechercher</button>
+    </div>
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="setFilter('tout',this)">Tout</button>
+      <button class="filter-tab" onclick="setFilter('film',this)">Films</button>
+      <button class="filter-tab" onclick="setFilter('serie',this)">Séries</button>
+      <button class="filter-tab" onclick="setFilter('anime',this)">Animés</button>
+      <button class="filter-tab" onclick="setFilter('documentaire',this)">Docs</button>
+    </div>
+  </div>
+</header>
+
+<!-- SEARCH RESULTS -->
+<div id="search-results" style="position:relative;z-index:10;padding:2rem;max-width:1400px;margin:0 auto;">
+  <div class="results-header">
+    <p class="results-title">Résultats pour : <span id="search-query-display"></span></p>
+    <a href="#" class="see-all" onclick="clearSearch(); return false;">✕ Effacer</a>
+  </div>
+  <div class="results-grid films-grid" id="results-container"></div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main id="main-content">
+
+  <!-- HERO BANNER -->
+  <div class="hero-banner">
+    <div class="hero-content">
+      <p class="hero-eyebrow">🎬 Bienvenue sur CineSearch</p>
+      <h1 class="hero-title">Trouvez, Explorez,<br>Téléchargez</h1>
+      <p class="hero-desc">Votre moteur de recherche cinéma complet. Fiches détaillées, liens de téléchargement et avis communautaires.</p>
+    </div>
+    <div class="hero-avatar" aria-hidden="true">
+      <img src="panda01.svg" alt="Avatar panda couché" />
+    </div>
+  </div>
+
+  <!-- TENDANCES -->
+  <div id="section-films">
+    <div class="section-header">
+      <div class="section-title">
+        <h2>🔥 TENDANCES</h2>
+        <span class="section-badge">CETTE SEMAINE</span>
+      </div>
+      <a href="#" class="see-all">Voir tout →</a>
+    </div>
+    <div class="films-grid" id="trending-grid"></div>
+
+    <div class="section-header">
+      <div class="section-title">
+        <h2>🎬 FILMS POPULAIRES</h2>
+        <span class="section-badge">TOP 2025–2026</span>
+      </div>
+      <a href="#" class="see-all">Voir tout →</a>
+    </div>
+    <div class="films-grid" id="movies-grid"></div>
+  </div>
+
+  <div id="section-series" style="display:none">
+    <div class="section-header">
+      <div class="section-title">
+        <h2>📺 SÉRIES POPULAIRES</h2>
+        <span class="section-badge">HOT</span>
+      </div>
+    </div>
+    <div class="films-grid" id="series-grid"></div>
+  </div>
+
+  <div id="section-animes" style="display:none">
+    <div class="section-header">
+      <div class="section-title">
+        <h2>⛩️ ANIMÉS POPULAIRES</h2>
+        <span class="section-badge">SÉLECTION</span>
+      </div>
+    </div>
+    <div class="films-grid" id="animes-grid"></div>
+  </div>
+
+  <div id="section-documentaires" style="display:none">
+    <div class="section-header">
+      <div class="section-title">
+        <h2>🎥 DOCUMENTAIRES</h2>
+        <span class="section-badge">DÉCOUVRIR</span>
+      </div>
+    </div>
+    <div class="films-grid" id="documentaires-grid"></div>
+  </div>
+
+  <!-- AVIS -->
+  <div class="reviews-section" id="avis-section">
+    <div class="section-header">
+      <div class="section-title">
+        <h2>💬 AVIS DE LA COMMUNAUTÉ</h2>
+      </div>
+    </div>
+    <div class="reviews-grid" id="reviews-grid"></div>
+    <button class="add-review-btn" onclick="openReviewForm()">+ Laisser un avis</button>
+  </div>
+
+  <!-- DEMANDE SECTION -->
+  <div class="demande-section" id="demande-section">
+    <div class="demande-content">
+      <h2 class="demande-title">📢 FILM <span>MANQUANT</span> ?</h2>
+      <p class="demande-desc">Vous ne trouvez pas un film ou une série ? Signalez-le ici et notre équipe l'ajoutera rapidement au catalogue.</p>
+
+      <div class="demande-form" id="demande-form">
+        <div class="form-row">
+          <input type="text" class="form-input" id="dem-titre" placeholder="Titre du film / série *">
+          <select class="form-select" id="dem-type">
+            <option value="">Type *</option>
+            <option>Film</option>
+            <option>Série</option>
+            <option>Animé</option>
+            <option>Documentaire</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <input type="text" class="form-input" id="dem-annee" placeholder="Année de sortie">
+          <input type="text" class="form-input" id="dem-realisateur" placeholder="Réalisateur / Studio">
+        </div>
+        <textarea class="form-textarea" id="dem-info" placeholder="Informations supplémentaires (acteurs, synopsis…)"></textarea>
+          <button class="submit-btn" onclick="submitDemande()">📨 Envoyer la demande</button>
+        </div>
+
+        <div class="demandes-list-section">
+          <h3 style="margin:0 0 0.6rem 0;color:var(--text-muted);">Demandes récentes</h3>
+          <ul id="demandes-list"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">CINESEARCH</div>
+  <p class="footer-text">Le moteur de recherche cinéma pour tous les amateurs de films et séries.</p>
+  <p class="footer-disclaimer">CineSearch est un moteur de recherche. Nous ne stockons aucun fichier. Les liens fournis redirigent vers des sources tierces disponibles sur internet.</p>
+  <p class="footer-author">henleydash</p>
+</footer>
+
+<!-- MODAL FILM -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-header">
+      <div class="modal-poster" id="modal-poster">🎬</div>
+      <div class="modal-meta">
+        <h2 class="modal-title" id="modal-title">Titre du Film</h2>
+        <div class="modal-rating-row">
+          <span class="modal-rating-num" id="modal-rating">8.5</span>
+          <span class="modal-stars" id="modal-stars">★★★★★</span>
+          <span class="modal-year" id="modal-year">2024</span>
+        </div>
+        <div class="modal-tags" id="modal-tags"></div>
+        <p style="font-size:0.82rem; color:var(--text-muted)" id="modal-info-line"></p>
+      </div>
+    </div>
+    <p class="modal-description" id="modal-description"></p>
+    <div class="modal-actions">
+      <a class="btn-download" id="modal-dl-btn" href="#" target="_blank" onclick="trackDownload()">
+        ⬇️ Télécharger / Voir les sources
+      </a>
+      <button class="btn-download btn-secondary" onclick="closeModal()">← Retour</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div class="modal-overlay" id="review-modal-overlay" onclick="if(event.target===this)closeReviewModal()">
+  <div class="modal" style="max-width:500px;">
+    <button class="modal-close" onclick="closeReviewModal()">✕</button>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;margin-bottom:1.2rem;">LAISSER UN AVIS</h2>
+    <div style="display:flex;flex-direction:column;gap:0.8rem;">
+      <input type="text" class="form-input" id="rev-pseudo" placeholder="Votre pseudo *">
+      <input type="text" class="form-input" id="rev-film" placeholder="Film / Série concerné(e) *">
+      <div style="display:flex;gap:0.5rem;">
+        <span style="color:var(--text-secondary);font-size:0.85rem;align-self:center;">Note :</span>
+        <div id="star-selector" style="display:flex;gap:4px;cursor:pointer;">
+          <span class="star-btn" data-val="1" style="font-size:1.5rem;color:var(--text-muted);" onclick="setStars(1)">★</span>
+          <span class="star-btn" data-val="2" style="font-size:1.5rem;color:var(--text-muted);" onclick="setStars(2)">★</span>
+          <span class="star-btn" data-val="3" style="font-size:1.5rem;color:var(--text-muted);" onclick="setStars(3)">★</span>
+          <span class="star-btn" data-val="4" style="font-size:1.5rem;color:var(--text-muted);" onclick="setStars(4)">★</span>
+          <span class="star-btn" data-val="5" style="font-size:1.5rem;color:var(--text-muted);" onclick="setStars(5)">★</span>
+        </div>
+      </div>
+      <textarea class="form-textarea" id="rev-text" placeholder="Votre avis (min. 20 caractères) *" style="min-height:100px;"></textarea>
+      <button class="submit-btn" onclick="submitReview()">Publier l'avis</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✅</span>
+  <span id="toast-msg">Action réussie !</span>
+</div>
+
+<script>
+// ===== DATA =====
+let selectedStars = 0;
+let activeFilter = 'tout';
+let currentSection = 'films';
+
+const catalog = [
+  // ===== TOP 10 FILMS 2025-2026 =====
+  { id:1, title:"Wuthering Heights", type:"film", genre:"Drame/Romance", year:2025, rating:8.8, emoji:"🌿", description:"Adaptation magistrale du roman de Brontë par Chloé Zhao. En 1596, Agnès et William Shakespeare perdent leur jeune fils Hamnet. Malgré la douleur, Agnès prend soin de leurs enfants survivants, tandis que William puise son chagrin pour écrire Hamlet.", cast:"Jessie Buckley, Paul Mescal", duration:"138 min", dl:"https://www.google.com/search?q=Wuthering+Heights+2025+film+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/yEa8UQA71rjKhCq04mATDNOIT2B.jpg" },
+  { id:2, title:"Father Mother Sister Brother", type:"film", genre:"Drame", year:2026, rating:8.6, emoji:"👨‍👩‍👧‍👦", description:"Lion d'Or à Venise 2025. Jim Jarmusch réunit une distribution impressionnante pour ce triptyque sur une famille confrontée à ses silences, ses héritages et ses fractures générationnelles.", cast:"Cate Blanchett, Adam Driver, Charlotte Rampling, Tom Waits", duration:"124 min", dl:"https://www.google.com/search?q=Father+Mother+Sister+Brother+Jarmusch+2026+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/fwjXTNPPsp5pcrFrYyR5karoXcV.jpg" },
+  { id:3, title:"Marty Supreme", type:"film", genre:"Drame", year:2026, rating:8.4, emoji:"🏓", description:"Le nouveau film de Josh Safdie, réalisateur de Uncut Gems, suit l'ascension fulgurante d'un joueur de ping-pong au caractère explosif dans le New York des années 80.", cast:"Timothée Chalamet, Tyler, the Creator", duration:"115 min", dl:"https://www.google.com/search?q=Marty+Supreme+Josh+Safdie+2026+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/hjrvtc7UCrnsypfnLJuxx9ODKCi.jpg" },
+  { id:4, title:"La Grazia", type:"film", genre:"Drame/Romance", year:2026, rating:8.3, emoji:"🇮🇹", description:"Le retour de Paolo Sorrentino (La Grande Bellezza) à la Mostra de Venise. Un homme politique esseulé doit faire des choix difficiles concernant une loi sur l'euthanasie, film sur l'amour, le deuil et le pouvoir.", cast:"Toni Servillo, Anna Farzetti", duration:"130 min", dl:"https://www.google.com/search?q=La+Grazia+Sorrentino+2026+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/h4GTGfZRzhxszMx3HVyD90rMYT2.jpg" },
+  { id:5, title:"Project Hail Mary", type:"film", genre:"Sci-Fi", year:2026, rating:8.5, emoji:"🚀", description:"Adapté du best-seller de Andy Weir. Un astronaute se réveille seul dans l'espace et réalise qu'il est peut-être la dernière chance de sauver la Terre d'une extinction.", cast:"Ryan Gosling", duration:"141 min", dl:"https://www.google.com/search?q=Project+Hail+Mary+film+2026+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/wzyy8ZrsuHfAt4iz4iH3rT0tdoT.jpg" },
+  { id:6, title:"Dune: Deuxième Partie", type:"film", genre:"Sci-Fi", year:2024, rating:8.7, emoji:"🏜️", description:"Paul Atreides s'allie avec les Fremen d'Arrakis pour mener une guerre de vengeance contre ceux qui ont détruit sa famille. Denis Villeneuve signe un chef-d'œuvre épique de science-fiction.", cast:"Timothée Chalamet, Zendaya, Rebecca Ferguson", duration:"166 min", dl:"https://www.google.com/search?q=Dune+Deuxième+Partie+2024+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/iRNbRAIGQQr5diGnjpwJFm0dgt4.jpg" },
+  { id:7, title:"The Brutalist", type:"film", genre:"Drame/Historique", year:2025, rating:8.9, emoji:"🏛️", description:"Fresque épique de 3h30 de Brady Corbet. Un architecte juif hongrois fuit l'Europe d'après-guerre pour refaire sa vie aux États-Unis, où il tente de réaliser son grand œuvre.", cast:"Adrien Brody, Felicity Jones, Guy Pearce", duration:"215 min", dl:"https://www.google.com/search?q=The+Brutalist+2025+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/qta0JRXb7JkJD8nSlUSUpLtSvZQ.jpg" },
+  { id:8, title:"Gladiator II", type:"film", genre:"Action/Péplum", year:2024, rating:7.4, emoji:"⚔️", description:"Des années après la mort de Maximus, un jeune guerrier combat dans les arènes de Rome pour venger sa terre natale. Ridley Scott retrouve l'arène avec une production titanesque.", cast:"Paul Mescal, Denzel Washington, Pedro Pascal", duration:"148 min", dl:"https://www.google.com/search?q=Gladiator+2+2024+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/sUnGXbEdXlgHlK3EkmB5w2NiLlc.jpg" },
+  { id:9, title:"Conclave", type:"film", genre:"Thriller", year:2024, rating:8.0, emoji:"⛪", description:"À la mort du Pape, les cardinaux du monde entier se réunissent à Rome pour élire son successeur dans un huis clos où secrets, manipulations et révélations éclatent.", cast:"Ralph Fiennes, Stanley Tucci, Isabella Rossellini", duration:"120 min", dl:"https://www.google.com/search?q=Conclave+2024+film+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/8BPRVN1oajfhnDFJiaN3cc4nhso.jpg" },
+  { id:10, title:"Nosferatu", type:"film", genre:"Horreur/Gothique", year:2024, rating:7.8, emoji:"🧛", description:"Robert Eggers réinvente le mythe du vampire avec une photographie en noir et blanc saisissante. Une jeune femme est hantée par un comte vampirique de Transylvanie.", cast:"Lily-Rose Depp, Bill Skarsgård, Willem Dafoe", duration:"132 min", dl:"https://www.google.com/search?q=Nosferatu+2024+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/A8UIMJTwSaflmWmUlfPOFdenSBT.jpg" },
+
+  // ===== TOP 10 SÉRIES 2025-2026 =====
+  { id:11, title:"The Pitt", type:"serie", genre:"Drame Médical", year:2025, rating:9.1, emoji:"🏥", description:"Primée aux Emmy Awards 2025, la série suit l'épuisement du Dr. Michael Robinavitch dans les urgences d'un hôpital de Pittsburgh. Chaque épisode représente une heure en temps réel dans cet enfer médical.", cast:"Noah Wyle, Patrick Ball, Supriya Ganesh", seasons:"Saison 2 en cours", dl:"https://www.google.com/search?q=The+Pitt+série+2025+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/3JxOVjbW2Kp2kYSh4N89OsWe2A4.jpg" },
+  { id:12, title:"Paradise", type:"serie", genre:"Thriller Politique/SF", year:2025, rating:8.8, emoji:"🏘️", description:"Disney+. Une communauté en apparence paisible réunissant des personnalités puissantes est perturbée par un meurtre. Le vernis luxueux de cet univers protégé vole en éclats dans ce thriller addictif.", cast:"Sterling K. Brown, James Marsden", seasons:"Saison 2 (2026)", dl:"https://www.google.com/search?q=Paradise+série+Disney+2025+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/p1iTGFxqORSk7RI8M3QoZbBqOra.jpg" },
+  { id:13, title:"Shogun", type:"serie", genre:"Historique/Drame", year:2024, rating:8.7, emoji:"⛩️", description:"Adaptation du roman de James Clavell. Au Japon féodal du XVIIe siècle, un navigateur anglais se retrouve au cœur des luttes de pouvoir entre les seigneurs de guerre japonais. Lauréate des Emmy Awards 2024.", cast:"Hiroyuki Sanada, Cosmo Jarvis, Anna Sawai", seasons:"1 saison (complete)", dl:"https://www.google.com/search?q=Shogun+série+2024+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/7O4iVfOMQmdCSxhOg1WnzG1AgYT.jpg" },
+  { id:14, title:"The Last of Us S2", type:"serie", genre:"Post-Apocalyptique", year:2025, rating:8.9, emoji:"🍄", description:"La suite tant attendue. Joel et Ellie font face à de nouvelles menaces dans un monde post-apocalyptique ravagé par l'infection fongique. Season 2 plonge dans des territoires émotionnels encore plus sombres.", cast:"Pedro Pascal, Bella Ramsey, Kaitlyn Dever", seasons:"Saison 2 (2025)", dl:"https://www.google.com/search?q=The+Last+of+Us+saison+2+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/4pMd9VAdqm96KA2W4X8yetgc7EF.jpg" },
+  { id:15, title:"House of the Dragon S3", type:"serie", genre:"Fantasy/Épique", year:2025, rating:8.5, emoji:"🐉", description:"La guerre civile des Targaryen entre dans sa phase finale. Dragons et trahisons s'enchaînent dans ce préquel de Game of Thrones. La saison 3 promet d'être la plus spectaculaire.", cast:"Emma D'Arcy, Matt Smith, Olivia Cooke", seasons:"Saison 3 (2025)", dl:"https://www.google.com/search?q=House+of+the+Dragon+saison+3+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/lP73xk4HGJ9CPxDWouzKzK6j82o.jpg" },
+  { id:16, title:"The Boys S5", type:"serie", genre:"Action/Satire", year:2025, rating:8.6, emoji:"💥", description:"La saison finale de la saga. Billy Butcher et ses Boys affrontent Homelander dans une confrontation épique. Amazon Prime Video délivre une conclusion à la hauteur de la série la plus subversive de la décennie.", cast:"Karl Urban, Anthony Starr, Jack Quaid", seasons:"Saison 5 (finale)", dl:"https://www.google.com/search?q=The+Boys+saison+5+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/zY7kdvnwv8zVXbEjXbmVLiSjhjc.jpg" },
+  { id:17, title:"Fallout", type:"serie", genre:"Sci-Fi/Post-Apo", year:2024, rating:8.4, emoji:"☢️", description:"Adaptation du jeu vidéo culte. Une jeune femme des Abris souterrains remonte en surface 200 ans après une apocalypse nucléaire et découvre un Far West radioactif plein de surprises.", cast:"Ella Purnell, Walton Goggins, Aaron Moten", seasons:"2 saisons", dl:"https://www.google.com/search?q=Fallout+série+Amazon+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/eyG7Rb6r4oIYQR07qUVq0gJ2gDj.jpg" },
+  { id:18, title:"Adolescence", type:"serie", genre:"Drame/Thriller", year:2025, rating:9.0, emoji:"🔪", description:"Mini-série britannique Netflix tournée en plans-séquences uniques. Un père est dévasté quand son fils de 13 ans est arrêté pour meurtre. Une exploration glaçante de la radicalisation en ligne chez les jeunes.", cast:"Stephen Graham, Owen Cooper, Ashley Walters", seasons:"Mini-série (4 épisodes)", dl:"https://www.google.com/search?q=Adolescence+Netflix+série+2025+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/v2Hb2UhkN73OEUd3fsmQOtiZqqs.jpg" },
+  { id:19, title:"Severance S2", type:"serie", genre:"Sci-Fi/Mystère", year:2025, rating:8.8, emoji:"🧠", description:"Apple TV+. Les employés de Lumon Industries continuent leur bizarre vie coupée en deux entre le monde du travail et la vie personnelle. La saison 2 lève enfin le voile sur les mystères de cette dystopie kafkaïenne.", cast:"Adam Scott, Patricia Arquette, John Turturro", seasons:"Saison 2 (2025)", dl:"https://www.google.com/search?q=Severance+saison+2+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/xmjW474DJ27bqTYNvS4MvraJgiQ.jpg" },
+  { id:20, title:"The Handmaid's Tale S6", type:"serie", genre:"Dystopie/Drame", year:2025, rating:8.3, emoji:"🔴", description:"La saison finale de la série culte. Offred/June mène la résistance contre la République de Gilead dans une conclusion épique attendue par des millions de fans depuis 2017.", cast:"Elisabeth Moss, Yvonne Strahovski, Joseph Fiennes", seasons:"Saison 6 (finale)", dl:"https://www.google.com/search?q=The+Handmaid's+Tale+saison+6+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/46a087NxApCdEWWJxqflmvHDTzt.jpg" },
+
+  // ===== TOP 10 ANIMÉS 2025-2026 =====
+  { id:21, title:"Jujutsu Kaisen S3", type:"anime", genre:"Action/Surnaturel", year:2025, rating:9.2, emoji:"👁️", description:"Le studio MAPPA frappe encore plus fort avec la saison 3. L'arc Culling Game met Yuji Itadori face à ses limites tandis que Sukuna révèle sa véritable puissance dans des combats d'une intensité inégalée.", cast:"Junya Enoki, Yuma Uchida, Yuichi Nakamura", seasons:"Saison 3 (2025)", dl:"https://www.google.com/search?q=Jujutsu+Kaisen+saison+3+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/w2Shg7bI5WB7LINt1KxB7eihO8s.jpg" },
+  { id:22, title:"Sakamoto Days", type:"anime", genre:"Action/Comédie", year:2025, rating:8.6, emoji:"🛒", description:"Netflix. L'adaptation du manga culte. Taro Sakamoto, ex-tueur légendaire reconverti en épicier de banlieue, doit protéger sa famille quand des assassins de son passé refont surface. Mélange explosif d'action et d'humour.", cast:"Tomokazu Sugita, Natsuki Hanae", seasons:"Saison 1 (2025)", dl:"https://www.google.com/search?q=Sakamoto+Days+anime+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/lRNXHxuOVO9TWIs98IOHTjY8XN7.jpg" },
+  { id:23, title:"Vinland Saga S3", type:"anime", genre:"Historique/Action", year:2025, rating:9.0, emoji:"⚓", description:"Wit Studio. Thorfinn continue son voyage vers la rédemption dans la suite très attendue. L'arc final de la saga viking promet une conclusion épique pleine de batailles et de questionnements sur la violence et la paix.", cast:"Yuto Uemura, Naoya Uchida", seasons:"Saison 3 (2025)", dl:"https://www.google.com/search?q=Vinland+Saga+saison+3+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/vUHlpA5c1NXkds59reY3HMb4Abs.jpg" },
+  { id:24, title:"Cyberpunk: Edgerunners 2", type:"anime", genre:"Cyberpunk/Action", year:2026, rating:8.9, emoji:"🦾", description:"La suite explosive de l'anime Netflix qui avait révolutionné le genre en 2022. De nouveaux personnages dans Night City, une ville encore plus corrompue, pour une nouvelle histoire de survie et de rébellion contre les méga-corporations.", cast:"Nouveau casting", seasons:"Saison 2 (2026)", dl:"https://www.google.com/search?q=Cyberpunk+Edgerunners+saison+2+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/74Oo4hRy9xadpDZGqsWu2XqoNje.jpg" },
+  { id:25, title:"Demon Slayer S4", type:"anime", genre:"Action/Surnaturel", year:2025, rating:8.8, emoji:"🗡️", description:"L'arc final du Château Infini. Tanjiro et ses compagnons Hashira se lancent dans la bataille décisive contre Muzan Kibutsuji et ses Douze Lunes. Le studio Ufotable met les bouchées doubles pour cette conclusion.", cast:"Natsuki Hanae, Akari Kitô, Yoshitsugu Matsuoka", seasons:"Saison 4 (2025)", dl:"https://www.google.com/search?q=Demon+Slayer+saison+4+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/iRNbRAIGQQr5diGnjpwJFm0dgt4.jpg" },
+  { id:26, title:"Ghost in the Shell: SAC_2025", type:"anime", genre:"Cyberpunk/Thriller", year:2026, rating:8.7, emoji:"🤖", description:"Le retour de la franchise légendaire. Section 9 et la majeure Kusanagi affrontent une nouvelle menace dans un Japon ultra-connecté où la frontière entre humain et machine est plus floue que jamais.", cast:"Atsuko Tanaka, Akio Otsuka", seasons:"Saison 1 (2026)", dl:"https://www.google.com/search?q=Ghost+in+the+Shell+SAC+2026+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/tPK8BER0Pyq68IGKHrTemGlxBV4.jpg" },
+  { id:27, title:"Dorohedoro S2", type:"anime", genre:"Dark Fantasy/Action", year:2026, rating:8.5, emoji:"🐊", description:"La suite de l'une des dark fantasy les plus originales. Caiman et Nikaidou continuent leur quête dans un monde étrange divisé entre la Hole sordide et le monde des magiciens. MAPPA reprend les rênes.", cast:"Wataru Takagi, Reina Ueda", seasons:"Saison 2 (2026)", dl:"https://www.google.com/search?q=Dorohedoro+saison+2+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/zSMmRTopPIRr6913KX8pyiV6zsK.jpg" },
+  { id:28, title:"Kusuriya no Hitorigoto S2", type:"anime", genre:"Mystère/Historique", year:2025, rating:9.1, emoji:"🌸", description:"La pharmacienne de cour Maomao reprend ses enquêtes dans la cour impériale de Chine ancienne. Plébiscitée comme la meilleure série animée de 2025, cette suite ravit les fans avec encore plus d'intrigues et de romance.", cast:"Aoi Yuki, Takeo Otsuka", seasons:"Saison 2 (2025)", dl:"https://www.google.com/search?q=Kusuriya+no+Hitorigoto+saison+2+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/47pSay5Ao7SFeyQBZVkW5ifyhAZ.jpg" },
+  { id:29, title:"Hell's Paradise S2", type:"anime", genre:"Action/Surnaturel", year:2026, rating:8.4, emoji:"🔥", description:"La suite de l'adaptation du manga de Yuji Kaku. Gabimaru le Creux et Sagiri reprennent leur exploration de l'île mystérieuse Shinsenkyo, paradis mortel peuplé de créatures immortelles et de secrets anciens.", cast:"Chiaki Kobayashi, Yumiri Hanamori", seasons:"Saison 2 (2026)", dl:"https://www.google.com/search?q=Hell's+Paradise+saison+2+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/1V9I7SvZbYoMbSvdtnlkkq9SB1k.jpg" },
+  { id:30, title:"Attack on Titan: The Last Attack", type:"anime", genre:"Action/Épique", year:2025, rating:9.3, emoji:"⚡", description:"Le film récapitulatif qui conclut définitivement l'épopée des Titans. Une œuvre monumentale réunissant les meilleures scènes de la saison finale dans un long-métrage ciné de 2h40 avec une animation inégalée.", cast:"Yuuki Kaji, Yui Ishikawa, Marina Inoue", duration:"160 min (film)", dl:"https://www.google.com/search?q=Attack+on+Titan+The+Last+Attack+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/3oL5SWl7tPqaretovPKw9x04CXh.jpg" },
+
+  // DOCUMENTAIRES
+  { id:31, title:"Free Solo", type:"documentaire", genre:"Sport/Aventure", year:2018, rating:8.2, emoji:"🧗", description:"Alex Honnold tente de grimper en solo intégral la face d'El Capitan dans le parc national de Yosemite. Un documentaire sur l'exploit sportif le plus dangereux jamais filmé.", cast:"Alex Honnold, Tommy Caldwell", duration:"100 min", dl:"https://www.google.com/search?q=Free+Solo+documentary+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/v4QfYZMACODlWul9doN9RxE99ag.jpg" },
+  { id:32, title:"Le Monde des Pieuvres", type:"documentaire", genre:"Nature", year:2020, rating:8.1, emoji:"🐙", description:"Un cinéaste se lie d'amitié avec une pieuvre qui vit dans un jardin de kelp en Afrique du Sud. Ce documentaire Netflix a remporté l'Oscar du meilleur documentaire.", cast:"Craig Foster", duration:"85 min", dl:"https://www.google.com/search?q=My+Octopus+Teacher+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/AaCMeTyRI2ojcQOrhV1GJaMutoB.jpg" },
+
+  // ===== 50 NOUVEAUX FILMS, SÉRIES, ANIMES ET DOCS =====
+  // FILMS 33-50
+  { id:33, title:"Inception", type:"film", genre:"Sci-Fi/Action", year:2010, rating:8.8, emoji:"💭", description:"Cobb doit infiltrer les rêves d'un PDG pour le faire renoncer à la fusion. Un film révolutionnaire sur les rêves et la réalité.", cast:"Leonardo DiCaprio, Marion Cotillard, Ellen Page", duration:"148 min", dl:"https://www.google.com/search?q=Inception+film+2010+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/9gk7adHYeDMPS6QW0ie3bNS4qJS.jpg" },
+  { id:34, title:"Blade Runner 2049", type:"film", genre:"Sci-Fi/Noir", year:2017, rating:8.0, emoji:"🤖", description:"K, un réplicant flic, découvre un secret qui pourrait changer le monde. Suite visuellement époustouflante et mélancolique de Blade Runner.", cast:"Ryan Gosling, Harrison Ford, Ana de Armas", duration:"164 min", dl:"https://www.google.com/search?q=Blade+Runner+2049+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/gajva2L0rPYAQVn520QrWeFvwgJ.jpg" },
+  { id:35, title:"Interstellar", type:"film", genre:"Sci-Fi/Drame", year:2014, rating:8.6, emoji:"🌌", description:"Des astronautes traversent un trou de ver pour sauver l'humanité. Un chef-d'œuvre cosmique de Nolan sur l'amour et le temps.", cast:"Matthew McConaughey, Anne Hathaway, Jessica Chastain", duration:"169 min", dl:"https://www.google.com/search?q=Interstellar+film+2014+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/gEU2QniE6E77NI6lCu244MyJlmO.jpg" },
+  { id:36, title:"La La Land", type:"film", genre:"Romance/Musique", year:2016, rating:8.0, emoji:"🎹", description:"Deux jeunes rêveurs à Los Angeles tombent amoureux malgré leurs ambitions conflictuelles. Un hymne bittersweet au rêve américain.", cast:"Ryan Gosling, Emma Stone", duration:"128 min", dl:"https://www.google.com/search?q=La+La+Land+film+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/uDO8zWDcbQoU8b0wKRD5aNtl8zS.jpg" },
+  { id:37, title:"Oppenheimer", type:"film", genre:"Historique/Drame", year:2023, rating:8.4, emoji:"☢️", description:"La vie du père de la bombe atomique, d'Oppenheimer, secouée par les conséquences éthiques de son invention. Chef-d'œuvre de Nolan.", cast:"Cillian Murphy, Robert Downey Jr, Emily Blunt", duration:"180 min", dl:"https://www.google.com/search?q=Oppenheimer+film+2023+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/8Gxv8rSfMMk8ItQr3dCGo5aoGO2.jpg" },
+  { id:38, title:"Mad Max Fury Road", type:"film", genre:"Action", year:2015, rating:8.1, emoji:"🏜️", description:"Dans un désert post-apocalyptique, Max aide une femme rebelle à s'échapper. Action brutale et artisanale, un chef-d'œuvre du cinéma d'action.", cast:"Tom Hardy, Charlize Theron", duration:"120 min", dl:"https://www.google.com/search?q=Mad+Max+Fury+Road+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/pyjZw4sLJQdHe5Xbzn8U8r8ynZA.jpg" },
+  { id:39, title:"Parasite", type:"film", genre:"Thriller/Drame", year:2019, rating:8.5, emoji:"🏠", description:"Une famille pauvre s'infiltre progressivement dans la vie d'une famille riche. Thriller social magistral qui a remporté l'Oscar du meilleur film.", cast:"Song Kang-ho, Lee Sun-kyun, Cho Yeo-jeong", duration:"132 min", dl:"https://www.google.com/search?q=Parasite+film+2019+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/1I5uP9JgS50YHYjTtQconv0G5S1.jpg" },
+  { id:40, title:"Joker", type:"film", genre:"Drame/Thriller", year:2019, rating:8.4, emoji:"🤡", description:"L'ascension d'Arthur Fleck, un comédien raté qui sombre dans la folie. Étude psychologique dérangeante et captivante.", cast:"Joaquin Phoenix", duration:"122 min", dl:"https://www.google.com/search?q=Joker+film+2019+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/udDclJGf0HS1jj7fil8b84uLTZd.jpg" },
+  { id:41, title:"Avengers Endgame", type:"film", genre:"Superhéros/Action", year:2019, rating:8.4, emoji:"🛡️", description:"Les Avengers survivants cherchent à vaincre Thanos définitivement. Épilogue spectaculaire et émouvant du MCU.", cast:"Robert Downey Jr, Chris Evans, Mark Ruffalo", duration:"181 min", dl:"https://www.google.com/search?q=Avengers+Endgame+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/or06FSLuopzPePPsPnG15XjYM5t.jpg" },
+  { id:42, title:"Spirited Away", type:"film", genre:"Fantasy/Animation", year:2001, rating:8.6, emoji:"🎋", description:"Une jeune fille se perd dans un monde fantastique peuplé de créatures surnaturelles. Chef-d'œuvre d'animation de Miyazaki.", cast:"Animation Ghibli", duration:"125 min", dl:"https://www.google.com/search?q=Spirited+Away+film+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/39wmItQFg06bD4r5rbv0nCwC122.jpg" },
+  { id:43, title:"Inception: Résurrection", type:"film", genre:"Sci-Fi/Thriller", year:2024, rating:8.2, emoji:"⏰", description:"Cobb retourne aux limbes pour une dernière mission avec des enjeux cosmiques encore plus hauts. Spin-off non-officiel explorant de nouveaux rêves.", cast:"Acteurs à confirmer", duration:"150 min", dl:"https://www.google.com/search?q=Inception+Résurrection+2024+film+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/9gk7adHYeDMPS6QW0ie3bNS4qJS.jpg" },
+  { id:44, title:"Avatar 3", type:"film", genre:"Sci-Fi/Action", year:2025, rating:8.0, emoji:"🌍", description:"Suite du monde de Pandora avec de nouvelles créatures et paysages visuels stupéfiants. James Cameron continue sa saga.", cast:"Sam Worthington, Zoe Saldana", duration:"180 min", dl:"https://www.google.com/search?q=Avatar+3+film+2025+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/2DCa9260A0h41NSg9lCjn8eCon.jpg" },
+  { id:45, title:"Optic", type:"film", genre:"Thriller/Action", year:2025, rating:7.9, emoji:"🔍", description:"Un espion aveugle doit retrouver un criminel dans une ville étrangère en utilisant uniquement son instinct et ses autres sens. Thriller inédit.", cast:"Cast à découvrir", duration:"115 min", dl:"https://www.google.com/search?q=Optic+film+2025+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/8bUSupAvBcYAsBG7xYwImD4N7eE.jpg" },
+  { id:46, title:"The Platform", type:"film", genre:"Dystopie/Horror", year:2021, rating:7.7, emoji:"📍", description:"Dans une prison verticale où la nourriture descend étage par étage, deux hommes découvrent un complot terrifiants. Film espagnol révélateur.", cast:"Ivan Massagué, Zorion Eguileor", duration:"94 min", dl:"https://www.google.com/search?q=The+Platform+film+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/bJ0J61wqaVu2pQvtHzVGKX4p9pS.jpg" },
+  { id:47, title:"Twisters", type:"film", genre:"Action/Catastrophe", year:2024, rating:7.8, emoji:"🌪️", description:"Des chasseurs de tornades affrontent les pires tempêtes du siècle. Spectaculaire et palpitant.", cast:"Glen Powell, Daisy Edgar-Jones", duration:"122 min", dl:"https://www.google.com/search?q=Twisters+film+2024+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/nMM0EAjKvIbJbVyKXKdQVGe8VUH.jpg" },
+  { id:48, title:"Anatomy of a Fall", type:"film", genre:"Drame/Thriller", year:2023, rating:8.3, emoji:"⚖️", description:"Après la mort suspicieuse de son mari, une femme écrivain devient suspect. Thriller judiciaire psychologique français brillant.", cast:"Sandra Hüller, Samuel Theis", duration:"179 min", dl:"https://www.google.com/search?q=Anatomy+of+a+Fall+film+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/AjNlwT8F0EzvZuSJcnCN8lNBmAi.jpg" },
+  { id:49, title:"Poor Things", type:"film", genre:"Drame/Fantasy", year:2023, rating:7.8, emoji:"🧬", description:"Une jeune femme construite artificiellement explore le monde. Conte de fées étrange et magnifique d'Yorgos Lanthimos.", cast:"Emma Stone, Mark Ruffalo, Willem Dafoe", duration:"141 min", dl:"https://www.google.com/search?q=Poor+Things+film+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/oHxkqI6VQiWVlb4N0sVWNLfp1pB.jpg" },
+  { id:50, title:"Killers of the Flower Moon", type:"film", genre:"Historique/Drame", year:2023, rating:8.2, emoji:"💀", description:"Dans les années 1920, une série de meurtres mystérieux visent des Osages riches. Scorsese enquête sur une conspiration oubliée.", cast:"Leonardo DiCaprio, Robert De Niro, Lily Gladstone", duration:"206 min", dl:"https://www.google.com/search?q=Killers+of+the+Flower+Moon+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/iyKIlVsBLn3XZBOjEFXMDx5oDc4.jpg" },
+
+  // SÉRIES 51-65
+  { id:51, title:"Breaking Bad", type:"serie", genre:"Drame/Crime", year:2008, rating:9.5, emoji:"⚗️", description:"Un professeur de chimie devient cuisinier de méthamphétamine après un diagnostic de cancer. L'une des meilleures séries de tous les temps.", cast:"Bryan Cranston, Aaron Paul", seasons:"5 saisons", dl:"https://www.google.com/search?q=Breaking+Bad+série+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/3bhkrj58Vtu7enYsU3VCtQf8fSO.jpg" },
+  { id:52, title:"Game of Thrones", type:"serie", genre:"Fantasy/Drame", year:2011, rating:9.2, emoji:"👑", description:"Sur le continent de Westeros, plusieurs familles nobles se battent pour le trône de fer. Épopée fantasy spectaculaire et brutale.", cast:"Emilia Clarke, Kit Harington, Peter Dinklage", seasons:"8 saisons", dl:"https://www.google.com/search?q=Game+of+Thrones+série+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/gwPSoagMUDVaVOw0QnL2kevaluation.jpg" },
+  { id:53, title:"The Office", type:"serie", genre:"Comédie", year:2005, rating:9.0, emoji:"📋", description:"Mockumentaire sur les employés d'un bureau ordinaire. Humour absurde et personnages attachants.", cast:"Steve Carell, Rainn Wilson, Mindy Kaling", seasons:"9 saisons", dl:"https://www.google.com/search?q=The+Office+série+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/5JgOhMNHF0pAe5K6Gvvz6T2D5dH.jpg" },
+  { id:54, title:"Stranger Things", type:"serie", genre:"Sci-Fi/Horreur", year:2016, rating:8.7, emoji:"👹", description:"Dans les années 80, des enfants découvrent des phénomènes surnaturels dans leur petite ville. Mélange nostalgique et terrifiant.", cast:"Winona Ryder, David Harbour, Millie Bobby Brown", seasons:"4 saisons", dl:"https://www.google.com/search?q=Stranger+Things+série+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/x2LSRK92Eb5fvXzCqAeJRYQjbqG.jpg" },
+  { id:55, title:"Peaky Blinders", type:"serie", genre:"Drame/Crime", year:2013, rating:8.8, emoji:"🎩", description:"Une famille de gangsters de Birmingham règne sur le crime organisé en Angleterre post-WWI. Série britannique sombre et élégante.", cast:"Cillian Murphy, Helen McCrory", seasons:"6 saisons", dl:"https://www.google.com/search?q=Peaky+Blinders+série+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/kewjhc8YI4wvNEKb5hyX4G9wAkJ.jpg" },
+  { id:56, title:"Chernobyl", type:"serie", genre:"Historique/Drame", year:2019, rating:9.3, emoji:"☢️", description:"Reconstitution de la catastrophe nucléaire de Chernobyl en 1986. Miniserie HBO historiquement fidèle et dramatique.", cast:"Jared Harris, Stellan Skarsgård, Emily Watson", seasons:"1 saison (5 épisodes)", dl:"https://www.google.com/search?q=Chernobyl+série+HBO+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/hZMZ4v4v2p76JFSkjLXEHw3wixU.jpg" },
+  { id:57, title:"Sherlock", type:"serie", genre:"Mystère/Crime", year:2010, rating:9.1, emoji:"🔎", description:"Adaptation moderne des aventures de Sherlock Holmes à Londres. Série britannique intelligente et captivante.", cast:"Benedict Cumberbatch, Martin Freeman", seasons:"4 saisons", dl:"https://www.google.com/search?q=Sherlock+série+BBC+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/zU0hc4bYD74kXdy2v5E3yS5D9JO.jpg" },
+  { id:58, title:"Mr Robot", type:"serie", genre:"Thriller/Drame", year:2015, rating:8.4, emoji:"💻", description:"Un hacker avec des troubles dissociatifs se joint à un groupe de hackers révolutionnaires. Thriller psychologique captivant.", cast:"Rami Malek, Christian Slater", seasons:"4 saisons", dl:"https://www.google.com/search?q=Mr+Robot+série+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/keW9n4OuZEU5zI9lJw5OMqMGdR4.jpg" },
+  { id:59, title:"The Crown", type:"serie", genre:"Historique/Drame", year:2016, rating:8.6, emoji:"👸", description:"L'histoire intime de la reine Élisabeth II et de la monarchie britannique du XXe siècle. Production Netflix somptueuse.", cast:"Claire Foy, Olivia Colman, Imelda Staunton", seasons:"5 saisons", dl:"https://www.google.com/search?q=The+Crown+série+Netflix+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/8pKsUxlOBvBwYe6A1OM5Nzd8HJL.jpg" },
+  { id:60, title:"Mindhunter", type:"serie", genre:"Crime/Thriller", year:2017, rating:8.6, emoji:"🧠", description:"Deux agents du FBI créent l'unité de profilage criminel en étudiant des tueurs en série. Thriller psychologique brillant.", cast:"Jonathan Groff, Holt McCallany", seasons:"2 saisons", dl:"https://www.google.com/search?q=Mindhunter+série+Netflix+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/fTJ4CxeYe0e7dKvZPYyZDJhKQj5.jpg" },
+  { id:61, title:"Ozark", type:"serie", genre:"Crime/Drame", year:2017, rating:8.5, emoji:"💰", description:"Une famille de classe moyenne se lance dans le blanchiment d'argent pour le crime organisé. Drame tendu et psychologique.", cast:"Jason Bateman, Laura Linney", seasons:"4 saisons", dl:"https://www.google.com/search?q=Ozark+série+Netflix+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/nK8I0sXxi8mfxcF3k63gk0T58Sf.jpg" },
+  { id:62, title:"Black Mirror", type:"serie", genre:"Sci-Fi/Drame", year:2011, rating:8.8, emoji:"📱", description:"Anthologie explorant les côtés sombres de la technologie et de la société. Chaque épisode est une histoire autonome troublante.", cast:"Divers casting", seasons:"6 saisons", dl:"https://www.google.com/search?q=Black+Mirror+série+Netflix+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/oTv96eG0L3qoEQECOxgkCLV5BaB.jpg" },
+  { id:63, title:"Succession", type:"serie", genre:"Drame", year:2021, rating:9.0, emoji:"💼", description:"Une famille de milliardaires se dispute le contrôle de leur empire médiatique. Drame familial acéré et hilarant.", cast:"Jeremy Strong, Sarah Snook, Kieran Culkin", seasons:"4 saisons", dl:"https://www.google.com/search?q=Succession+série+HBO+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/n0bEFKMEHwwmrXU4f9dRQ4mPJG9.jpg" },
+  { id:64, title:"Westworld", type:"serie", genre:"Sci-Fi/Drame", year:2016, rating:8.5, emoji:"🤠", description:"Un parc thématique futuriste peuplé de robots androïdes devient le théâtre d'une rébellion. Sci-fi complexe et visuelle.", cast:"Evan Rachel Wood, James Marsden, Anthony Hopkins", seasons:"4 saisons", dl:"https://www.google.com/search?q=Westworld+série+HBO+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/eIg0Lfx1A1WJuFPRpwDUeNtSUFh.jpg" },
+  { id:65, title:"True Detective", type:"serie", genre:"Crime/Thriller", year:2014, rating:8.9, emoji:"🔦", description:"Deux détectives enquêtent sur un meurtre cultiste en Louisiane. Miniserie anthologique avec une atmosphère étouffante.", cast:"Matthew McConaughey, Woody Harrelson", seasons:"4 saisons", dl:"https://www.google.com/search?q=True+Detective+série+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/4QxqcJ2YAy6f5jFx9hZfyv8SHlx.jpg" },
+
+  // ANIMES 66-76
+  { id:66, title:"Death Note", type:"anime", genre:"Thriller/Surnaturel", year:2006, rating:8.6, emoji:"📓", description:"Un lycéen découvre un carnet magique qui lui permet de tuer quiconque dont il écrit le nom. Thriller psychologique addictif.", cast:"Mamoru Morino, Kappei Yamaguchi", seasons:"2 saisons", dl:"https://www.google.com/search?q=Death+Note+anime+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/W1yt64nzS9nVLi08XRYcKLrGShQ.jpg" },
+  { id:67, title:"Naruto", type:"anime", genre:"Action/Aventure", year:2002, rating:8.3, emoji:"🍜", description:"Un jeune ninja orphelin cherche la reconnaissance et rêve de devenir Hokage. Saga épique sur l'amitié et la persévérance.", cast:"Junichi Suwabe, Kazuhiko Inoue", seasons:"20+ saisons", dl:"https://www.google.com/search?q=Naruto+anime+VOSTFR+complet+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/5ZksmN4BH3bvHSkjPndPXVhVzks.jpg" },
+  { id:68, title:"Fullmetal Alchemist", type:"anime", genre:"Fantasy/Action", year:2005, rating:9.0, emoji:"⚗️", description:"Deux frères alchimistes cherchent la Pierre Philosophale pour réparer leurs erreurs. Manga adapté avec une intrigue complexe et émotionnelle.", cast:"Romi Park, David Matranga", seasons:"2 saisons", dl:"https://www.google.com/search?q=Fullmetal+Alchemist+anime+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/KtsN3z8Bl3G5L4Fy4Y9GH0BLq9E.jpg" },
+  { id:69, title:"One Piece", type:"anime", genre:"Action/Aventure", year:1999, rating:8.5, emoji:"⛵", description:"Un jeune pirate cherche le trésor légendaire One Piece avec son équipage. L'une des plus longues séries anime avec une communauté massive.", cast:"Kazuya Nakai, Akemi Okamura", seasons:"20+ saisons", dl:"https://www.google.com/search?q=One+Piece+anime+VOSTFR+complet+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/4z1Y8WFbU0pO5bxEu6utXqLKB8o.jpg" },
+  { id:70, title:"Steins;Gate", type:"anime", genre:"Sci-Fi/Thriller", year:2011, rating:8.76, emoji:"⏱️", description:"Un groupe d'étudiants découvre comment voyager dans le temps via des microondes. Thriller de science-fiction aux rebondissements parfaits.", cast:"Mamoru Miyano, Asami Inoue", seasons:"1 saison + films", dl:"https://www.google.com/search?q=Steins+Gate+anime+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/FfqmJMpHqZ2h9n8LV9gT8CXZj0j.jpg" },
+  { id:71, title:"Tokyo Ghoul", type:"anime", genre:"Action/Horreur", year:2014, rating:7.8, emoji:"🧛", description:"Un jeune homme devient mi-humain mi-ghoul après une transplantation. Thriller sombre sur l'identité et la survie.", cast:"Natsuhito Onda, Sora Amamiya", seasons:"4 saisons", dl:"https://www.google.com/search?q=Tokyo+Ghoul+anime+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/cQAp4k8RDXgm1tEqPJMVYkFbfZe.jpg" },
+  { id:72, title:"Mob Psycho 100", type:"anime", genre:"Action/Comédie", year:2016, rating:8.7, emoji:"👻", description:"Un collégien avec des pouvoirs psychiques puissants essaie de mener une vie normale. Série amusante avec une belle OST et une philosophie douce.", cast:"Setsuo Itou, Akemi Okamura", seasons:"3 saisons", dl:"https://www.google.com/search?q=Mob+Psycho+100+anime+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/TpSKGHheJqxc8sVf9CuF3tDKrZO.jpg" },
+  { id:73, title:"Monster", type:"anime", genre:"Thriller/Drame", year:2004, rating:8.6, emoji:"👹", description:"Un neurologue recherche une jeune série de meurtres commis par un enfant qu'il a sauvé autrefois. Thriller psychologique dense et captivant.", cast:"Hidenobu Kiuchi, Kaori Nazuka", seasons:"1 saison (74 épisodes)", dl:"https://www.google.com/search?q=Monster+anime+VOSTFR+complet+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/g74tCXE9DfSfUhqzHqeOYLjY2tW.jpg" },
+  { id:74, title:"Code Geass", type:"anime", genre:"Mecha/Drame", year:2006, rating:8.3, emoji:"👁️", description:"Un lycéen acquiert le pouvoir de contrôler les gens et devient un rebelle pour changer le monde. Mecha anime avec intrigue politique complexe.", cast:"Terashima Takuma, Yukana", seasons:"2 saisons", dl:"https://www.google.com/search?q=Code+Geass+anime+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/5QL8iGKhWEt5D9gAvvqE68A5nRh.jpg" },
+  { id:75, title:"Ergo Proxy", type:"anime", genre:"Cyberpunk/Sci-Fi", year:2006, rating:7.9, emoji:"🤖", description:"Dans un monde post-apocalyptique, une femme et un proxie alien voyagent ensemble. Anime cyberpunk philosophique et visuellement unique.", cast:"Hiroshi Tsuchida, Rie Saitou", seasons:"1 saison (23 épisodes)", dl:"https://www.google.com/search?q=Ergo+Proxy+anime+VOSTFR+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/oEXgBrXPjpIQPQZy3W6LZRlHHhL.jpg" },
+  { id:76, title:"Nana", type:"anime", genre:"Drame/Romance", year:2006, rating:7.8, emoji:"🎸", description:"Deux jeunes filles portant le même prénom se rencontrent et forment une amitié profonde. Drama anime sur la musique, l'amitié et l'amour.", cast:"Tomoe Hanba, Junko Takeuchi", seasons:"1 saison (50 épisodes)", dl:"https://www.google.com/search?q=Nana+anime+VOSTFR+complet+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/kKHxb3vXpLchYFx2GC8oOd7qQEy.jpg" },
+
+  // DOCUMENTAIRES 77-82
+  { id:77, title:"Planet Earth", type:"documentaire", genre:"Nature", year:2016, rating:9.0, emoji:"🌍", description:"Documentaire époustouflant en Ultra HD montrant la diversité extraordinaire de la vie sur Terre. Produit par BBC avec David Attenborough.", cast:"David Attenborough", duration:"8 épisodes × 50 min", dl:"https://www.google.com/search?q=Planet+Earth+2+documentary+BBC+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/z7a62CIKfBCLJTxXJw9Bx7j9hRl.jpg" },
+  { id:78, title:"Our Planet", type:"documentaire", genre:"Nature/Écologie", year:2019, rating:8.5, emoji:"🐋", description:"Exploration des différents écosystèmes de la Terre et de l'impact du changement climatique. Production Netflix somptueuse.", cast:"David Attenborough", duration:"8 épisodes × 50 min", dl:"https://www.google.com/search?q=Our+Planet+Netflix+documentary+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/qkCL0TqiNWnEGmhFMi31rvPcMvR.jpg" },
+  { id:79, title:"13th", type:"documentaire", genre:"Histoire/Politique", year:2016, rating:8.2, emoji:"⛓️", description:"Documentaire sur la criminalisation et l'incarcération de masse des Afro-Américains aux États-Unis. Film politique crucial de Ava DuVernay.", cast:"Documentaire", duration:"100 min", dl:"https://www.google.com/search?q=13th+Ava+DuVernay+documentary+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/qvRY6YSPgMXcNbePWGlEIZgzV8C.jpg" },
+  { id:80, title:"The Social Dilemma", type:"documentaire", genre:"Technologie/Société", year:2020, rating:7.6, emoji:"📱", description:"Enquête sur les effets addictifs et manipulateurs des réseaux sociaux. Document alarmant et révélateur.", cast:"Documentaire-dramatique", duration:"94 min", dl:"https://www.google.com/search?q=The+Social+Dilemma+Netflix+documentary+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/VRYEiAm1r4YMXoLFOvxhpWg2Ygj.jpg" },
+  { id:81, title:"Apollo 11", type:"documentaire", genre:"Histoire/Espace", year:2019, rating:8.4, emoji:"🚀", description:"Reconstitution captivante du programme Apollo 11 et du premier alunissage en 1969. Documentaire époustouflant en IMAX.", cast:"Documentaire", duration:"93 min", dl:"https://www.google.com/search?q=Apollo+11+documentary+2019+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/2nrzCrOJKSy5Ddc8lE3lV3lR3aO.jpg" },
+  { id:82, title:"Seaspiracy", type:"documentaire", genre:"Nature/Écologie", year:2021, rating:7.7, emoji:"🐟", description:"Documentaire sur la surpêche et la destruction des océans par l'industrie de la pêche. Film documentaire troublant et informatif.", cast:"Ali Tabrizi", duration:"89 min", dl:"https://www.google.com/search?q=Seaspiracy+Netflix+documentary+télécharger", poster:"https://media.themoviedb.org/t/p/w600_and_h900_face/mHWJmV8m2g8v0WwlT0oxFBiBBMN.jpg" },
+];
+
+let reviews = [
+  { pseudo:"KaijuFan229", film:"Jujutsu Kaisen S3", stars:5, text:"La saison 3 est tout simplement monumentale. MAPPA a surpassé toutes les attentes. Les combats sont d'une fluidité hallucinante, l'émotion est là à chaque épisode. Meilleur anime de 2025 sans discussion.", date:"2 juin 2025" },
+  { pseudo:"SeriesAddict", film:"Adolescence (Netflix)", stars:5, text:"Probablement la meilleure mini-série que j'ai vue depuis des années. Filmée en plans-séquences uniques, chaque épisode est une prouesse technique et émotionnelle. Stephen Graham est époustouflant.", date:"28 mai 2025" },
+  { pseudo:"CineVision", film:"The Brutalist", stars:5, text:"Un film monumental de 3h30 qui ne laisse pas indemne. Adrien Brody livre la performance de sa vie. Lent, dense, mais d'une beauté absolue. Mérite amplement son Oscar.", date:"15 avril 2025" },
+  { pseudo:"NightCinema", film:"The Pitt", stars:5, text:"Noah Wyle dans les urgences, c'est du génie pur. Chaque épisode représente une heure en temps réel. On est dans le chaos total, c'est stressant, mais on ne peut pas décrocher.", date:"10 mai 2025" },
+  { pseudo:"AnimeWorld", film:"Attack on Titan: The Last Attack", stars:5, text:"La conclusion ultime d'une saga générationnelle. Ce film réunit les meilleures scènes de la finale avec une animation inégalée. J'ai pleuré du début à la fin. Merci Isayama.", date:"3 juin 2025" },
+  { pseudo:"FilmScope007", film:"Project Hail Mary", stars:5, text:"Ryan Gosling dans l'adaptation du roman de Andy Weir, c'était un rêve. Le film dépasse même le livre. Émotionnellement dévastateur, scientifiquement précis, et visuellement sublime.", date:"1 juin 2026" },
+];
+
+let demandes = [];
+
+// ===== DEMANDES: persistence & render =====
+function loadDemandes() {
+  try {
+    const raw = localStorage.getItem('cinesearch_demandes');
+    demandes = raw ? JSON.parse(raw) : [];
+  } catch (e) { demandes = []; }
+}
+
+function saveDemandes() {
+  try { localStorage.setItem('cinesearch_demandes', JSON.stringify(demandes)); } catch (e) {}
+}
+
+function renderDemandes() {
+  const container = document.getElementById('demandes-list');
+  if (!container) return;
+  container.innerHTML = '';
+  if (!demandes || demandes.length === 0) {
+    container.innerHTML = '<li style="color:var(--text-muted);">Aucune demande pour l\'instant.</li>';
+    return;
+  }
+  // afficher les plus récentes en premier
+  demandes.slice().reverse().forEach((dm, i) => {
+    const li = document.createElement('li');
+    li.className = 'demande-item';
+    const typeLabel = dm.type ? `<span class="dem-type">${dm.type}</span>` : '';
+    const meta = dm.annee ? ` · ${dm.annee}` : '';
+    li.innerHTML = `<div><strong>${escapeHtml(dm.titre)}</strong>${typeLabel}<span class="dem-meta">${meta}</span></div>
+                    <div class="dem-info">${escapeHtml(dm.info || '')}</div>
+                    <div class="dem-meta">${escapeHtml(dm.realisateur || '')}</div>`;
+    container.appendChild(li);
+  });
+}
+
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" })[c]); }
+
+// ===== RENDER FUNCTIONS =====
+function getPosterUrl(item) {
+  // si item.poster est défini, on utilise l'URL réelle du poster
+  if (item.poster) return item.poster;
+  const typeKeyword = item.type === 'serie' ? 'series' : item.type === 'documentaire' ? 'documentary' : item.type;
+  const encodedTitle = encodeURIComponent(item.title.replace(/\s+/g, '+'));
+  return `https://source.unsplash.com/featured/400x600/?${typeKeyword},poster,${encodedTitle}`;
+}
+
+function createCard(item) {
+  const card = document.createElement('div');
+  card.className = 'film-card';
+  const typeBadgeClass = { film:'badge-film', serie:'badge-serie', anime:'badge-anime', documentaire:'badge-docu' }[item.type];
+  const typeLabel = { film:'Film', serie:'Série', anime:'Animé', documentaire:'Doc' }[item.type];
+  const posterUrl = getPosterUrl(item);
+  card.innerHTML = `
+    <div class="film-poster">
+      <img class="film-poster-img" src="${posterUrl}" alt="Affiche de ${item.title}" onerror="this.style.display='none'; this.parentElement.querySelector('.film-poster-emoji').style.display='flex'" />
+      <span class="film-poster-emoji" style="display:none">${item.emoji}</span>
+      <div class="film-poster-gradient"></div>
+      <span class="film-type-badge ${typeBadgeClass}">${typeLabel}</span>
+      <span class="film-rating">${item.rating}</span>
+    </div>
+    <div class="film-info">
+      <p class="film-title">${item.title}</p>
+      <div class="film-meta">
+        <span class="film-genre">${item.genre}</span>
+        <span>${item.year}</span>
+      </div>
+    </div>
+  `;
+  card.onclick = () => openModal(item);
+  return card;
+}
+
+function renderGrid(containerId, items) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  items.forEach(item => container.appendChild(createCard(item)));
+}
+
+function initCatalog() {
+  const films = catalog.filter(i => i.type === 'film');
+  const series = catalog.filter(i => i.type === 'serie');
+  const animes = catalog.filter(i => i.type === 'anime');
+  const docs = catalog.filter(i => i.type === 'documentaire');
+
+  renderGrid('trending-grid', [...catalog].sort((a,b) => b.rating - a.rating).slice(0,6));
+  renderGrid('movies-grid', films);
+  renderGrid('series-grid', series);
+  renderGrid('animes-grid', animes);
+  renderGrid('documentaires-grid', docs);
+  renderReviews();
+}
+
+function renderReviews() {
+  const grid = document.getElementById('reviews-grid');
+  grid.innerHTML = '';
+  reviews.slice(0,6).forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'review-card';
+    const initials = r.pseudo.substring(0,2).toUpperCase();
+    const stars = '★'.repeat(r.stars) + '☆'.repeat(5-r.stars);
+    div.innerHTML = `
+      <div class="review-header">
+        <div class="review-avatar">${initials}</div>
+        <div>
+          <p class="review-user">${r.pseudo}</p>
+          <p class="review-film">sur : ${r.film}</p>
+        </div>
+        <span class="review-stars">${stars}</span>
+      </div>
+      <p class="review-text">${r.text}</p>
+      <p class="review-date">${r.date}</p>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+// ===== SEARCH =====
+let searchTimeout;
+function handleSearch() {
+  clearTimeout(searchTimeout);
+  const q = document.getElementById('searchInput').value.trim();
+  if (q.length < 2) {
+    document.getElementById('search-results').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    return;
+  }
+  searchTimeout = setTimeout(() => performSearch(), 300);
+}
+
+function performSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!q) { clearSearch(); return; }
+
+  let results = catalog.filter(item => {
+    const matchText = item.title.toLowerCase().includes(q) || item.genre.toLowerCase().includes(q) || (item.cast && item.cast.toLowerCase().includes(q));
+    const matchFilter = activeFilter === 'tout' || item.type === activeFilter;
+    return matchText && matchFilter;
+  });
+
+  document.getElementById('search-query-display').textContent = `"${q}"`;
+  document.getElementById('search-results').style.display = 'block';
+  document.getElementById('main-content').style.display = 'none';
+
+  const container = document.getElementById('results-container');
+  container.innerHTML = '';
+  if (results.length === 0) {
+    container.innerHTML = `<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:3rem 0;">Aucun résultat pour "${q}". <a href="#demande-section" style="color:var(--blue-light);" onclick="clearSearch()">Signaler ce film manquant →</a></p>`;
+  } else {
+    results.forEach(item => container.appendChild(createCard(item)));
+  }
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('search-results').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+}
+
+function setFilter(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ===== SECTIONS =====
+function showSection(section) {
+  currentSection = section;
+  clearSearch();
+  ['films','series','animes','documentaires'].forEach(s => {
+    const el = document.getElementById('section-'+s);
+    if (el) el.style.display = s === section ? 'block' : 'none';
+  });
+  document.querySelectorAll('nav a').forEach((a,i) => {
+    a.classList.toggle('active', i === ['films','series','animes','documentaires'].indexOf(section));
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function showHome() {
+  clearSearch();
+  ['films','series','animes','documentaires'].forEach(s => {
+    const el = document.getElementById('section-'+s);
+    if (el) el.style.display = s === 'films' ? 'block' : 'none';
+  });
+}
+
+// ===== MODAL =====
+function openModal(item) {
+  const posterContainer = document.getElementById('modal-poster');
+  posterContainer.innerHTML = '';
+  const posterImg = document.createElement('img');
+  posterImg.src = getPosterUrl(item);
+  posterImg.alt = `Affiche de ${item.title}`;
+  posterImg.onerror = () => { posterContainer.textContent = item.emoji; };
+  posterContainer.appendChild(posterImg);
+
+  document.getElementById('modal-title').textContent = item.title;
+  const r = item.rating;
+  document.getElementById('modal-rating').textContent = r;
+  const fullStars = Math.round(r / 2);
+  document.getElementById('modal-stars').textContent = '★'.repeat(fullStars) + '☆'.repeat(5-fullStars);
+  document.getElementById('modal-year').textContent = item.year + (item.duration ? ' • ' + item.duration : item.seasons ? ' • ' + item.seasons : '');
+  document.getElementById('modal-description').textContent = item.description;
+  document.getElementById('modal-info-line').textContent = item.cast ? '🎭 ' + item.cast : '';
+  document.getElementById('modal-dl-btn').href = item.dl;
+
+  const tags = document.getElementById('modal-tags');
+  tags.innerHTML = '';
+  [item.genre, item.type.charAt(0).toUpperCase()+item.type.slice(1), item.year.toString()].forEach(t => {
+    const span = document.createElement('span');
+    span.className = 'modal-tag';
+    span.textContent = t;
+    tags.appendChild(span);
+  });
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function trackDownload() {
+  showToast('🔗 Redirection vers les sources de téléchargement…');
+}
+
+// ===== REVIEWS =====
+function openReviewForm() {
+  document.getElementById('review-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReviewModal() {
+  document.getElementById('review-modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function setStars(val) {
+  selectedStars = val;
+  document.querySelectorAll('.star-btn').forEach((s,i) => {
+    s.style.color = i < val ? '#ffd700' : 'var(--text-muted)';
+  });
+}
+
+function submitReview() {
+  const pseudo = document.getElementById('rev-pseudo').value.trim();
+  const film = document.getElementById('rev-film').value.trim();
+  const text = document.getElementById('rev-text').value.trim();
+
+  if (!pseudo || !film || !text || selectedStars === 0) {
+    showToast('⚠️ Veuillez remplir tous les champs et noter le film.');
+    return;
+  }
+  if (text.length < 20) {
+    showToast('⚠️ L\'avis doit contenir au moins 20 caractères.');
+    return;
+  }
+
+  const today = new Date();
+  reviews.unshift({
+    pseudo, film, stars: selectedStars, text,
+    date: today.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' })
+  });
+
+  renderReviews();
+  closeReviewModal();
+  showToast('✅ Votre avis a été publié avec succès !');
+
+  document.getElementById('rev-pseudo').value = '';
+  document.getElementById('rev-film').value = '';
+  document.getElementById('rev-text').value = '';
+  selectedStars = 0;
+  setStars(0);
+}
+
+// ===== DEMANDE =====
+function submitDemande() {
+  const titre = document.getElementById('dem-titre').value.trim();
+  const type = document.getElementById('dem-type').value;
+
+  if (!titre || !type) {
+    showToast('⚠️ Le titre et le type sont obligatoires.');
+    return;
+  }
+
+  demandes.push({ titre, type, annee: document.getElementById('dem-annee').value, realisateur: document.getElementById('dem-realisateur').value, info: document.getElementById('dem-info').value });
+  saveDemandes();
+  renderDemandes();
+
+  ['dem-titre','dem-annee','dem-realisateur','dem-info'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('dem-type').value = '';
+  showToast('📨 Demande envoyée ! Nous l\'examinerons sous 48h.');
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+// ===== INIT =====
+initCatalog();
+loadDemandes();
+renderDemandes();
+</script>
+</body>
+</html>
